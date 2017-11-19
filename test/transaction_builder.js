@@ -3,6 +3,7 @@
 var assert = require('assert')
 var baddress = require('../src/address')
 var bscript = require('../src/script')
+var btemplates = require('../src/templates')
 var ops = require('bitcoin-ops')
 
 var BigInteger = require('bigi')
@@ -50,6 +51,7 @@ function construct (f, dontSign) {
 
   if (dontSign) return txb
 
+  var stages = f.stages && f.stages.concat()
   f.inputs.forEach(function (input, index) {
     if (!input.signs) return
     input.signs.forEach(function (sign) {
@@ -67,6 +69,12 @@ function construct (f, dontSign) {
         witnessScript = bscript.fromASM(sign.witnessScript)
       }
       txb.sign(index, keyPair, redeemScript, sign.hashType, value, witnessScript)
+
+      if (sign.stage) {
+        var tx = txb.buildIncomplete()
+        assert.strictEqual(tx.toHex(), stages.shift())
+        txb = TransactionBuilder.fromTransaction(tx, network)
+      }
     })
   })
 
@@ -122,6 +130,16 @@ describe('TransactionBuilder', function () {
         txAfter.outs.forEach(function (output, i) {
           assert.equal(bscript.toASM(output.script), f.outputs[i].script)
         })
+      })
+    })
+
+    it('correctly classifies transaction inputs', function () {
+      var tx = Transaction.fromHex(fixtures.valid.classification.hex)
+      var txb = TransactionBuilder.fromTransaction(tx)
+      txb.inputs.forEach(function (i) {
+        assert.strictEqual(i.prevOutType, 'scripthash')
+        assert.strictEqual(i.redeemScriptType, 'multisig')
+        assert.strictEqual(i.signType, 'multisig')
       })
     })
 
@@ -276,6 +294,19 @@ describe('TransactionBuilder', function () {
   })
 
   describe('sign', function () {
+    it('supports the alternative abstract interface { publicKey, sign }', function () {
+      var keyPair = {
+        publicKey: Buffer.alloc(33, 0x03),
+        sign: function (hash) { return Buffer.alloc(64) }
+      }
+
+      var txb = new TransactionBuilder()
+      txb.addInput('ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', 1)
+      txb.addOutput('1111111111111111111114oLvT2', 100000)
+      txb.sign(0, keyPair)
+      assert.equal(txb.build().toHex(), '0100000001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff010000002c0930060201000201000121030303030303030303030303030303030303030303030303030303030303030303ffffffff01a0860100000000001976a914000000000000000000000000000000000000000088ac00000000')
+    })
+
     fixtures.invalid.sign.forEach(function (f) {
       it('throws on ' + f.exception + (f.description ? ' (' + f.description + ')' : ''), function () {
         var txb = construct(f, true)
@@ -424,7 +455,7 @@ describe('TransactionBuilder', function () {
                 var signatures = bscript.decompile(scriptSig).slice(1, -1).filter(function (x) { return x !== ops.OP_0 })
 
                 // rebuild/replace the scriptSig without them
-                var replacement = bscript.scriptHash.input.encode(bscript.multisig.input.encode(signatures), redeemScript)
+                var replacement = btemplates.scriptHash.input.encode(btemplates.multisig.input.encode(signatures), redeemScript)
                 assert.strictEqual(bscript.toASM(replacement), sign.scriptSigFiltered)
 
                 tx.ins[i].script = replacement
