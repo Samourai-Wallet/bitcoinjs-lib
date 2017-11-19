@@ -2,7 +2,6 @@
 
 var Buffer = require('safe-buffer').Buffer
 var bscript = require('../../script')
-var p2mso = require('./output')
 var typeforce = require('typeforce')
 var OPS = require('bitcoin-ops')
 
@@ -29,7 +28,7 @@ function encodeStack (signatures, scriptPubKey) {
   typeforce([partialSignature], signatures)
 
   if (scriptPubKey) {
-    var scriptData = p2mso.decode(scriptPubKey)
+    var scriptData = bscript.multisig.output.decode(scriptPubKey)
 
     if (signatures.length < scriptData.m) {
       throw new TypeError('Not enough signatures provided')

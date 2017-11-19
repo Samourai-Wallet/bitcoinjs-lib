@@ -212,3 +212,8 @@ module.exports = {
   isPushOnly: isPushOnly,
   isDefinedHashType: isDefinedHashType
 }
+
+var templates = require('./templates')
+for (var key in templates) {
+  module.exports[key] = templates[key]
+}

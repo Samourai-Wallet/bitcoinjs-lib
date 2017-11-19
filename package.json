@@ -1,17 +1,38 @@
 {
   "name": "bitcoinjs-lib",
-  "version": "3.3.0",
+  "version": "3.2.0",
   "description": "Client-side Bitcoin JavaScript library",
   "main": "./src/index.js",
   "engines": {
     "node": ">=4.0.0"
   },
   "keywords": [
-    "bitcoinjs",
     "bitcoin",
-    "browserify",
-    "javascript",
-    "bitcoinjs"
+    "browser",
+    "client",
+    "library"
+  ],
+  "contributors": [
+    {
+      "name": "Daniel Cousens",
+      "email": "bitcoin@dcousens.com",
+      "url": "http://dcousens.com"
+    },
+    {
+      "name": "Kyle Drake",
+      "email": "kyle@kyledrake.net",
+      "url": "http://kyledrake.net/"
+    },
+    {
+      "name": "Wei Lu",
+      "email": "luwei.here@gmail.com",
+      "url": "http://weilu.github.io/"
+    },
+    {
+      "name": "Stefan Thomas",
+      "email": "justmoon@members.fsf.org",
+      "url": "http://www.justmoon.net"
+    }
   ],
   "scripts": {
     "coverage-report": "nyc report --reporter=lcov",

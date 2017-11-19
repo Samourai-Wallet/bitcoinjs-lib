@@ -6,7 +6,7 @@
 [![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
 
 The pure JavaScript Bitcoin library for node.js and browsers.
-Estimated to be in use by over 15 million wallet users and is the backbone for almost all Bitcoin web wallets in production today.
+Used by over a million wallet users and the backbone for almost all Bitcoin web wallets in production today.
 
 
 ## Features
@@ -41,40 +41,40 @@ var bitcoin = require('bitcoinjs-lib')
 
 ### Browser
 If you're familiar with how to use browserify, ignore this and proceed normally.
-These steps are advisory only,  and may not be suitable for your application.
+These steps are advisory only,  and may not be necessary for your application.
 
 [Browserify](https://github.com/substack/node-browserify) is assumed to be installed for these steps.
 
-For your project, create an `index.js` file
+From your repository, create an `index.js` file
 ``` javascript
-let bitcoin = require('bitcoinjs-lib')
-
-// your code here
-function myFunction () {
-	return bitcoin.ECPair.makeRandom().toWIF()
-}
-
 module.exports = {
-	myFunction
+  base58: require('bs58'),
+  bitcoin: require('bitcoinjs-lib'),
+  ecurve: require('ecurve'),
+  BigInteger: require('bigi')
 }
 ```
 
-Now, to compile for the browser:
+Install each of the above packages locally
 ``` bash
-browserify index.js --standalone foo > app.js
+npm install bs58 bitcoinjs-lib ecurve bigi
 ```
 
-You can now put `<script src="app.js" />` in your web page,  using `foo.myFunction` to create a new Bitcoin private key.
+After installation, use browserify to compile `index.js` for use in the browser:
+``` bash
+    $ browserify index.js --standalone foo > app.js
+```
 
-**NOTE**: If you uglify the javascript, you must exclude the following variable names from being mangled: `BigInteger`, `ECPair`, `Point`.
+You will now be able to use `<script src="app.js" />` in your browser, with each of the above exports accessible via the global `foo` object (or whatever you chose for the `--standalone` parameter above).
+
+**NOTE**: See our package.json for the currently supported version of browserify used by this repository.
+
+**NOTE**: When uglifying the javascript, you must exclude the following variable names from being mangled: `Array`, `BigInteger`, `Boolean`, `ECPair`, `Function`, `Number`, `Point` and `Script`.
 This is because of the function-name-duck-typing used in [typeforce](https://github.com/dcousens/typeforce).
-
 Example:
 ``` bash
-uglifyjs ... --mangle --reserved 'BigInteger,ECPair,Point'
+uglifyjs ... --mangle --reserved 'Array,BigInteger,Boolean,ECPair,Function,Number,Point'
 ```
-
-**NOTE**: This library tracks Node LTS features,  if you need strict ES5,  use [`--transform babelify`](https://github.com/babel/babelify) in conjunction with your `browserify` step (using an [`es2015`](http://babeljs.io/docs/plugins/preset-es2015/) preset).
 
 **NOTE**: If you expect this library to run on an iOS 10 device, ensure that you are using [buffer@5.0.5](https://github.com/feross/buffer/pull/155) or greater.
 
@@ -85,7 +85,7 @@ Type declarations for Typescript are available for version `^3.0.0` of the libra
 npm install @types/bitcoinjs-lib
 ```
 
-You can now use `bitcoinjs-lib` as a typescript compliant library.
+You can now use `bitcoinjs-lib` as a typescript compliant library. 
 ``` javascript
 import { HDNode, Transaction } from 'bitcoinjs-lib'
 ```

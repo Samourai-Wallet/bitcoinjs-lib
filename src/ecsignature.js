@@ -12,28 +12,22 @@ function ECSignature (r, s) {
 }
 
 ECSignature.parseCompact = function (buffer) {
-  typeforce(types.BufferN(65), buffer)
+  if (buffer.length !== 65) throw new Error('Invalid signature length')
 
   var flagByte = buffer.readUInt8(0) - 27
   if (flagByte !== (flagByte & 7)) throw new Error('Invalid signature parameter')
 
   var compressed = !!(flagByte & 4)
   var recoveryParam = flagByte & 3
-  var signature = ECSignature.fromRSBuffer(buffer.slice(1))
+
+  var r = BigInteger.fromBuffer(buffer.slice(1, 33))
+  var s = BigInteger.fromBuffer(buffer.slice(33))
 
   return {
     compressed: compressed,
     i: recoveryParam,
-    signature: signature
+    signature: new ECSignature(r, s)
   }
-}
-
-ECSignature.fromRSBuffer = function (buffer) {
-  typeforce(types.BufferN(64), buffer)
-
-  var r = BigInteger.fromBuffer(buffer.slice(0, 32))
-  var s = BigInteger.fromBuffer(buffer.slice(32, 64))
-  return new ECSignature(r, s)
 }
 
 ECSignature.fromDER = function (buffer) {
@@ -66,7 +60,9 @@ ECSignature.prototype.toCompact = function (i, compressed) {
 
   var buffer = Buffer.alloc(65)
   buffer.writeUInt8(i, 0)
-  this.toRSBuffer(buffer, 1)
+  this.r.toBuffer(32).copy(buffer, 1)
+  this.s.toBuffer(32).copy(buffer, 33)
+
   return buffer
 }
 
@@ -75,13 +71,6 @@ ECSignature.prototype.toDER = function () {
   var s = Buffer.from(this.s.toDERInteger())
 
   return bip66.encode(r, s)
-}
-
-ECSignature.prototype.toRSBuffer = function (buffer, offset) {
-  buffer = buffer || Buffer.alloc(64)
-  this.r.toBuffer(32).copy(buffer, offset)
-  this.s.toBuffer(32).copy(buffer, offset + 32)
-  return buffer
 }
 
 ECSignature.prototype.toScriptSignature = function (hashType) {
