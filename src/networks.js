@@ -10,8 +10,12 @@ module.exports = {
       private: 0x0488ade4
     },
     bip49: {
-      public: 0x049D7CB2,
-      private: 0x049D7878
+      public: 0x049d7cb2,
+      private: 0x049d7878
+    },
+    bip84: {
+      public: 0x04b24746,
+      private: 0x04b2430c
     },
     pubKeyHash: 0x00,
     scriptHash: 0x05,
@@ -25,8 +29,12 @@ module.exports = {
       private: 0x04358394
     },
     bip49: {
-      public: 0x044A5262,
-      private: 0x044A4E28
+      public: 0x044a5262,
+      private: 0x044a4e28
+    },
+    bip84: {
+      public: 0x045f1cf6,
+      private: 0x045f18bc
     },
     pubKeyHash: 0x6f,
     scriptHash: 0xc4,
